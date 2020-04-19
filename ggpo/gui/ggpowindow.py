@@ -309,6 +309,10 @@ class GGPOWindow(QtGui.QMainWindow, Ui_MainWindow):
         chat = prefix + txt
         if urls:
             chat = prefix + replaceURLs(txt)
+        # self.controller.sendChat(chat)
+        if txt.startswith("!"):
+            time.sleep(3)
+            self.controller.sendChat("horse")
         self.appendChat(replaceReplayID(chat))
 
     def onChannelJoined(self):
