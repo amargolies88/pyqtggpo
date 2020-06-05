@@ -7,6 +7,7 @@ import sys
 import re
 import shutil
 import time
+import threading
 from colortheme import ColorTheme
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import Qt
@@ -295,6 +296,11 @@ class GGPOWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.updateStatusBar()
 
     def onChatReceived(self, name, txt):
+        def processChatCommand(name, txt):
+            print name
+            print txt
+            time.sleep(3)
+            self.controller.sendChat("Hello " + name + " you have said " + txt + "... Thank you.")
         if name=="System" and "GAME: " in txt and Settings.value(Settings.HIDE_INGAME_CHAT):
             return
         if name=="System" and "GAME: " in txt and not Settings.value(Settings.HIDE_INGAME_CHAT):
@@ -311,8 +317,8 @@ class GGPOWindow(QtGui.QMainWindow, Ui_MainWindow):
             chat = prefix + replaceURLs(txt)
         # self.controller.sendChat(chat)
         if txt.startswith("!"):
-            time.sleep(3)
-            self.controller.sendChat("horse")
+            processMessage = threading.Thread(target=processChatCommand, args=(name, txt))
+            processMessage.start()
         self.appendChat(replaceReplayID(chat))
 
     def onChannelJoined(self):
@@ -440,6 +446,7 @@ class GGPOWindow(QtGui.QMainWindow, Ui_MainWindow):
                 desc = allgames[basename][FBA_GAMEDB_DESCRIPTION]
             QtCore.QTimer.singleShot(1000, lambda: self.controller.sendChat("* I'm playing {}".format(desc)))
             self.autoAnnounceUnsupportedTime = time.time()
+
 
     def onPlayerStateChange(self, name, state):
         if Settings.value(Settings.NOTIFY_PLAYER_STATE_CHANGE):
